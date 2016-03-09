@@ -1,4 +1,7 @@
-# JvH
+#Corroboración de picos y descubrimiento de motivos en *P. aeruginosa*
+
+Licenciatura en Ciencias Genómicas
+Cuarto Semestre
 
 Anastasia Hernandez Koutoucheva
 Alán Fernando Muñoz González
