@@ -26,7 +26,94 @@ Las secuencias tienen alrededor de 230 pdb lo cual es un buen indicio para los p
 
 Tabla 1: Resultados de peak calling con los datos de picos obtenidos directamente del artículo original.
 
+![Tabla 1]("imgs/tabla1")
 
+
+Tabla 2: Resultados de peak calling con los picos obtenidos con MACS2.
+![Tabla 2]("imgs/tabla2")
+
+
+Después las matrices con los resultados generados son guardadas en un formato .transfac
+
+Uso de herramientas de clustering para corroborar los resultados:
+
+Para realizar este paso, se cambia al servidor Fungi para aumentar la velocidad del proceso. Matrix tools -> Matrix-clustering, todos los parámetros se quedan en su forma predeterminada, con excepción de  Motif comparison with compare-matrices-quick (100 times faster). Only for Ncor and Cor, el cual se activa.  
+
+Tabla 3: Resultados de matrix-clustering para ambos casos.
+![Tabla 3]("imgs/tabla3")
+
+Control Negativo
+
+Regresas al servidor RSat de Procariotes. Se usa NGS-ChIP-seq-> random genome fragments para buscar falsos positivos en los resultados. Para esto, se utiliza el mismo organismo que en el análisis de peak calling (Pseudomonas aeruginosa pao1.ASM676v1.30)  y dejas todas las opciones de forma predeterminada, con excepción de Mask repeats. Después, se usa la opción Peak-motifs en RSat de Fungi; con los mismos parámetros que en el análisis de Peak calling.
+
+Tabla 4: Resultados de control negativo para ambos casos.
+![Tabla 4]("imgs/tabla4")
+
+Como nota, todos los análisis de peak-motifs se realizaron con oligos, esto fue porque se intentaron usar otros enfoques (el análisis de diadas no fue usado en este punto) como el de tomar únicamente el parámetro de posición, el cual (generalmente) regresó menos motivos (con menor significancia) con las secuencias prueba. Y, en el control negativo disminuyeron aún más los motivos encontrados (pero, la significancia se mantuvo). Por ejemplo, para el caso de la secuencia 2588 la secuencia regresó 4 motivos con significancia menor a 1 y el control negativo en este experimento retornó 1 motivo con significancia de 1.  Además, únicamente con este enfoque, podría usarse la secuencia completa del organismo como control.
+
+![Figure 1]("imgs/fig1")
+
+Motivos de algr
+![Figure 2]("imgs/fig2")
+
+
+Figura 2: Descubrimiento de motivos de AlgR con MEME [1].
+![Figure 3]("imgs/fig3")
+
+Figura 3: Descubrimiento de motivos con RSat con picos obtenidos del artículo original.
+![Figure 4]("imgs/fig4")
+
+Figura 4: Descubrimiento de motivos con RSat con picos obtenidos manualmente con MACS2.
+
+###Análisis de diadas
+
+El análisis de diadas se realizó con la herramienta dyad-analysis de RSat, en el servidor de procariotes. Para esto, se usó el archivo en formato fasta del pico de AlgR y P. aeruginosa como organismo para modelo de Background, el resto de los parámetros se quedaron en su forma predeterminada.
+
+###Workflow para nuestros peaks
+
+Descargar Secuencias de lecturas cortas
+http://www.ebi.ac.uk/ena/data/view/SRP052880
+
+Mapear con genoma de referencia en bowtie2
+Index de genoma de Pseudomonas aeruginosa a bowtie2
+http://support.illumina.com/sequencing/sequencing_software/igenome.html
+bowtie2 build [Genome_fasta] PAO1
+
+Mapear Lecturas de Illumina con genoma de referencia
+	bowtie2 PAO1 seq_name.fastq -S seq_name.sam -N 1
+	bowtie2 PAO1 seq_name.fastq -S seq_name.sam --very-sensitive
+
+El cambio daba ~1% de más secuencias, por lo que decidimos usar en RSAT los mapeos de la línea inicial
+
+Pseudomonas aeruginosa strain PAO1  NCBI  2000-09-13
+ 
+![Tabla 5]("imgs/tabla5")
+![Tabla 6]("imgs/tabla6")
+
+
+
+MACS2 Peak Call
+macs2 callpeak -t SAM/$bname.sam -f SAM -n peaks/$bname -g 6.3e6 -q 0.01 --nomodel --shiftsize 100
+
+------------------------
+Comandos en el servidor: 
+
+Peak Calling: $RSAT/perl-scripts/peak-motifs  -v 1 -title '2688vsmacs2'  -i $RSAT/public_html/tmp/apache/2016/02/20/peak-motifs.2016-02-20.195401_2016-02-20.195401_PP1XpT/peak-motifspeak_seq  -max_seq_len 1000 -markov auto -disco oligos,positions -nmotifs 5  -minol 6 -maxol 7  -no_merge_lengths -2str  -origin center  -motif_db regulonDB tf $RSAT/public_html/motif_databases/REGULONDB/regulonDB_2015-08-07.tf -scan_markov 1 -source getfasta  -task purge,seqlen,composition,disco,merge_motifs,split_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan -prefix peak-motifs -noov -img_format png  -outdir $RSAT/public_html/tmp/apache/2016/02/20/peak-motifs.2016-02-20.195401_2016-02-20.195401_PP1XpT)
+
+Matrix-clustering: $RSAT/perl-scripts/matrix-clustering  -v 1 -max_matrices 300 -matrix_format transfac -i $RSAT/public_html/tmp/www-data/2016/02/22/matrix-clustering_2016-02-22.014846_eMBEdG/matrix-clustering_query_matrices.transfac -hclust_method average -title 'testfun2588' -metric_build_tree 'Ncor' -lth w 5 -lth cor 0.6 -lth Ncor 0.4 -quick -label_in_tree name -return json,heatmap  -o $RSAT/public_html/tmp/www-data/2016/02/22/matrix-clustering_2016-02-22.014846_eMBEdG/matrix-clustering 2> $RSAT/public_html/tmp/www-data/2016/02/22/matrix-clustering_2016-02-22.014846_eMBEdG/matrix-clustering_err.txt
+
+Control negativo: $RSAT/perl-scripts/random-genome-fragments  -template_format len -i $RSAT/public_html/tmp/apache/2016/02/21/random-genome-fragments_2016-02-21.202329_U9mlWz.lengths -org Pseudomonas_aeruginosa_pao1.ASM676v1.30  -return seq  -rm  -o $RSAT/public_html/tmp/apache/2016/02/21/random-genome-fragments_2016-02-21.202329_U9mlWz_fragments.fasta 2> $RSAT/public_html/tmp/apache/2016/02/21/random-genome-fragments_2016-02-21.202329_U9mlWz_error_log.txt
+
+$RSAT/perl-scripts/peak-motifs  -v 1 -title '2588_negativectrol'  -i $RSAT/public_html/tmp/www-data/2016/02/22/peak-motifs.2016-02-22.032359_2016-02-22.032359_flPJWK/peak-motifspeak_seq -ctrl $RSAT/public_html/tmp/www-data/2016/02/22/peak-motifs.2016-02-22.032359_2016-02-22.032359_flPJWK/peak-motifscontrol_seq  -max_seq_len 1000 -markov auto -disco oligos,positions -nmotifs 5  -minol 6 -maxol 7  -no_merge_lengths -2str  -origin center  -motif_db regulonDB tf $RSAT/public_html/motif_databases/REGULONDB/regulonDB_2015-08-07.tf -scan_markov 1 -task purge,seqlen,composition,disco,merge_motifs,split_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan -prefix peak-motifs -noov -img_format png  -outdir $RSAT/public_html/tmp/www-data/2016/02/22/peak-motifs.2016-02-22.032359_2016-02-22.032359_flPJWK
+
+
+Bibliografía.
+http://nar.oxfordjournals.org/content/43/17/8268.long
+Langmead, B., Trapnell, C., Pop, M., & Salzberg, S. L. (2009). Ultrafast and memory-efficient alignment of short DNA sequences to the human genome. Genome biol, 10(3), R25.
+
+
+
+$RSAT/perl-scripts/retrieve-seq  -org Pseudomonas_aeruginosa_PAO1_uid57945 -feattype gene -type upstream -format fasta -label name -from -1000 -to 200 -noorf  -rm  -all (?)
 
 ##Peak Calling Statistics
 
