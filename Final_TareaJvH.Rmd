@@ -1,0 +1,112 @@
+##Material Suplementario
+El trabajo se basa en los datos de Chip-seq obtenidos en el artículo ChIP-seq reveals the global regulator AlgR mediating cyclic di-GMP synthesis in Pseudomonas aeruginosa.
+
+
+
+Detección de motivos
+
+Se obtienen las secuencias en formato .txt de GEO Accesion GSE65356 (http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE65356), se convierten al formato .bed requerido para el análisis, mediante: 
+
+En bash: 
+more secuencia_DirectaDeGeo.txt | grep -v "#" | cut -f 2,3,10 > seqid.bed
+
+Usando R:	
+	table <- read.table("../Downloads/seqid.bed")
+Chrname <- rep("Chromosome",length(table[,1]))
+ntable <- data.frame(Chrname,table)
+write.table(ntable,"../Downloads/seqid_clean.bed", sep = "\t", row.names = F, col.names =F, quote = F)
+
+
+
+En RSat, se cambia a la base de datos de procariotes; en sequence tools -> sequences from bed/gff/vcf  y se elige el organismo Pseudomonas aeruginosa pao1.ASM676v1.30; la opción Mask repeats se deja en su forma predeterminada. Tras obtener los archivos en formato .fasta, se procede a usar la herramienta Peak motifs; con los parámetros default excepto en Compare discovered motifs with databases, en la que únicamente se elige a los procariotes en RegulonDB.
+
+Análisis de Peak Calling
+
+Las secuencias tienen alrededor de 230 pdb lo cual es un buen indicio para los picos de ChIP-seq ya que son números menores a los que se obtendrían con picos de histonas. La composición en las secuencias es mayor para nucleótidos G/C y menor para la de A/T; pero en cada una de las parejas se observa el mismo patrón (fig). En la composición de dinucleótidos se observa el mismo patrón de aumento en G/C sobre A/T. Para la secuencia de control, se observan los mismos patrones de composición de nucleótidos.
+
+Tabla 1: Resultados de peak calling con los datos de picos obtenidos directamente del artículo original.
+
+
+
+##Peak Calling Statistics
+
+Llamamos datos
+```{r}
+chip_art <- read.table("~/Downloads/GSE65356_algrmacs2e15_peaks.txt", header = T)
+chip_ours <-read.table("~/JvH_Practice/peaks2/SRR1776549_peaks.xls", header=T)
+
+```
+Ploteamos la distribución de reads de acuerdo al pileup.
+
+```{r}
+par(mfrow=c(3,1))
+hist(chip_art$pileup,
+     main="Reads Distribution (Article)",
+     ylab="Frequency",
+     xlab="Pileup reads",
+     xlim = c(0,300),
+     col="red",
+     border = "red",
+     breaks = 500)
+
+hist(chip_ours$pileup,
+     main="Reads Distribution (Ours)",
+     ylab="Frequency",
+     xlab="Pileup reads",
+     xlim = c(0,300),
+     col="green",
+     border = "green",
+     breaks = 500)
+
+hist(chip_ours$pileup,
+     main="Reads Distribution (Ours) *Expanded",
+     ylab="Frequency",
+     xlab="Pileup reads",
+     xlim = c(0,700),
+     col="green",
+     border = "green",
+     breaks = 500)
+
+```
+
+
+Ploteamos el enriquecimiento de picos uno sobre otro y viceversa, para ver dónde coinciden y con cuánta precisión.
+```{r}
+
+par(mfrow=c(2,1))
+plot(chip_art  $abs_summit,chip_art$fold_enrichment,
+     main="Fold Enrichment (Article over ours)",
+     ylab="Enrichment",
+     xlab="Genome position",
+     xlim = c(0,6400000),
+     col="red",  type = "h")
+
+par(new=T)
+
+plot(chip_ours$abs_summit,
+     chip_ours$fold_enrichment,
+     xlim = c(0,6400000),
+     ylab = "",
+     xlab = "",
+     col="green", type = "h")
+     
+
+plot(chip_ours $abs_summit,chip_ours$fold_enrichment,
+     main="Fold Enrichment (Ours over)",
+     ylab="Enrichment",
+     xlab="Genome position",
+     xlim = c(0,6400000),
+     col="green",  type = "h")
+
+par(new=T)
+
+plot(chip_art$abs_summit,
+     chip_art$fold_enrichment,
+     xlim = c(0,6400000),
+     ylab = "",
+     xlab = "",
+     col="red", type = "h")
+``` 
+
+summit <- chip_art$abs_summit
+peaks <- apply(summit,1,subset(chip_ours,start<chip_art$abs_summit & end>chip_art$abs_summit)))
