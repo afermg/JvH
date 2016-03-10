@@ -1,6 +1,6 @@
 ---
-title: "Corroboraci?n de picos y descubrimiento de motivos en *P. aeruginosa*"
-author: "Anastasia Hern?ndez Koutoucheva y Al?n Fernando Mu?oz Gonz?lez"
+title: "Corroboración de picos y descubrimiento de motivos en *P. aeruginosa*"
+author: "Anastasia Hern?ndez Koutoucheva y Alán Fernando Muñoz Gonzñlez"
 output: pdf_document
 ---
 ###Introducci?n
