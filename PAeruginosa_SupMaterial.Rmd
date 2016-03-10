@@ -1,18 +1,16 @@
 ---
-title: "Supplementario JvH"
-author: "ahernank y afermg"
-date: "9 de marzo de 2016"
-output: html_document
- 
+title: 'Material Suplementario: Corroboración de picos y descubrimiento de motivos
+  en *P. aeruginosa*'
+author: "Anastasia Hernández Koutoucheva y Alán Fernando Muñoz González"
+output: pdf_document
 ---
-##Material Suplementario
-El trabajo se basa en los datos de Chip-seq obtenidos en el art?culo ChIP-seq reveals the global regulator AlgR mediating cyclic di-GMP synthesis in Pseudomonas aeruginosa.
+El trabajo se basa en los datos de Chip-seq obtenidos en el artículo ChIP-seq reveals the global regulator AlgR mediating cyclic di-GMP synthesis in Pseudomonas aeruginosa.
 
 
 
-Detecci?n de motivos
+###Detección de motivos
 
-Se obtienen las secuencias en formato .txt de GEO Accesion GSE65356 (http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE65356), se convierten al formato .bed requerido para el an?lisis, mediante: 
+Se obtienen las secuencias en formato .txt de GEO Accesion GSE65356 (http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE65356), se convierten al formato .bed requerido para el análisis, mediante: 
 
 En bash: 
 more secuencia_DirectaDeGeo.txt | grep -v "#" | cut -f 2,3,10 > seqid.bed
@@ -25,63 +23,56 @@ write.table(ntable,"../Downloads/seqid_clean.bed", sep = "\t", row.names = F, co
 
 
 
-En RSat, se cambia a la base de datos de procariotes; en sequence tools -> sequences from bed/gff/vcf  y se elige el organismo Pseudomonas aeruginosa pao1.ASM676v1.30; la opci?n Mask repeats se deja en su forma predeterminada. Tras obtener los archivos en formato .fasta, se procede a usar la herramienta Peak motifs; con los par?metros default excepto en Compare discovered motifs with databases, en la que ?nicamente se elige a los procariotes en RegulonDB.
+En RSat, se cambia a la base de datos de procariotes; en sequence tools -> sequences from bed/gff/vcf  y se elige el organismo Pseudomonas aeruginosa pao1.ASM676v1.30; la opción Mask repeats se deja en su forma predeterminada. Tras obtener los archivos en formato .fasta, se procede a usar la herramienta Peak motifs; con los parámetros default excepto en Compare discovered motifs with databases, en la que únicamente se elige a los procariotes en RegulonDB.
 
-An?lisis de Peak Calling
+###Análisis de Peak Calling
 
-Las secuencias tienen alrededor de 230 pdb lo cual es un buen indicio para los picos de ChIP-seq ya que son n?meros menores a los que se obtendr?an con picos de histonas. La composici?n en las secuencias es mayor para nucle?tidos G/C y menor para la de A/T; pero en cada una de las parejas se observa el mismo patr?n (fig). En la composici?n de dinucle?tidos se observa el mismo patr?n de aumento en G/C sobre A/T. Para la secuencia de control, se observan los mismos patrones de composici?n de nucle?tidos.
+Las secuencias tienen alrededor de 230 pdb lo cual es un buen indicio para los picos de ChIP-seq ya que son números menores a los que se obtendrían con picos de histonas. La composición en las secuencias es mayor para nucleótidos G/C y menor para la de A/T; pero en cada una de las parejas se observa el mismo patrón (Figura 1). En la composición de dinucleótidos se observa el mismo patrón de aumento en G/C sobre A/T. Para la secuencia de control, se observan los mismos patrones de composición de nucleótidos.
 
-Tabla 1: Resultados de peak calling con los datos de picos obtenidos directamente del art?culo original.
 
 ![Tabla 1](imgs/tabla1.png)
 
 
-Tabla 2: Resultados de peak calling con los picos obtenidos con MACS2.
 ![Tabla 2](imgs/tabla2.png)
 
 
-Despu?s las matrices con los resultados generados son guardadas en un formato .transfac
 
-Uso de herramientas de clustering para corroborar los resultados:
+Como nota, la secuencia usada para el análisis con los datos procesados manualmente es la número 50; debido a que toda la secuencia es completamente igual a la obtenida en el artículo. Cabe resaltar la similitud con otras como la 51, en la que obtenemos la secuencia misma y además, más información.
+Después las matrices con los resultados generados son guardadas en un formato .transfac
 
-Para realizar este paso, se cambia al servidor Fungi para aumentar la velocidad del proceso. Matrix tools -> Matrix-clustering, todos los par?metros se quedan en su forma predeterminada, con excepci?n de  Motif comparison with compare-matrices-quick (100 times faster). Only for Ncor and Cor, el cual se activa.  
 
-Tabla 3: Resultados de matrix-clustering para ambos casos.
+##Uso de herramientas de clustering para corroborar los resultados
 
+Para realizar este paso, se cambia al servidor Fungi para aumentar la velocidad del proceso. Matrix tools -> Matrix-clustering, todos los parámetros se quedan en su forma predeterminada, con excepción de  Motif comparison with compare-matrices-quick (100 times faster). Only for Ncor and Cor, el cual se activa.  
 
 ![Tabla 3](imgs/tabla3.png)
 
-Control Negativo
+###Control Negativo
 
-Regresas al servidor RSat de Procariotes. Se usa NGS-ChIP-seq-> random genome fragments para buscar falsos positivos en los resultados. Para esto, se utiliza el mismo organismo que en el an?lisis de peak calling (Pseudomonas aeruginosa pao1.ASM676v1.30)  y dejas todas las opciones de forma predeterminada, con excepci?n de Mask repeats. Despu?s, se usa la opci?n Peak-motifs en RSat de Fungi; con los mismos par?metros que en el an?lisis de Peak calling.
-
-Tabla 4: Resultados de control negativo para ambos casos.
-
+Regresas al servidor RSat de Procariotes. Se usa NGS-ChIP-seq-> random genome fragments para buscar falsos positivos en los resultados. Para esto, se utiliza el mismo organismo que en el análisis de peak calling (Pseudomonas aeruginosa pao1.ASM676v1.30)  y dejas todas las opciones de forma predeterminada, con excepción de Mask repeats. Después, se usa la opción Peak-motifs en RSat de Fungi; con los mismos parámetros que en el análisis de Peak calling.
 
 ![Tabla 4](imgs/tabla4.png)
 
-Como nota, todos los an?lisis de peak-motifs se realizaron con oligos, esto fue porque se intentaron usar otros enfoques (el an?lisis de diadas no fue usado en este punto) como el de tomar ?nicamente el par?metro de posici?n, el cual (generalmente) regres? menos motivos (con menor significancia) con las secuencias prueba. Y, en el control negativo disminuyeron a?n m?s los motivos encontrados (pero, la significancia se mantuvo). Por ejemplo, para el caso de la secuencia 2588 la secuencia regres? 4 motivos con significancia menor a 1 y el control negativo en este experimento retorn? 1 motivo con significancia de 1.  Adem?s, ?nicamente con este enfoque, podr?a usarse la secuencia completa del organismo como control.
+Como nota, todos los análisis de peak-motifs se realizaron con oligos, esto fue porque se intentaron usar otros enfoques (el análisis de diadas no fue usado en este punto) como el de tomar únicamente el parámetro de posición, el cual (generalmente) regresó menos motivos (con menor significancia) con las secuencias prueba. Y, en el control negativo disminuyeron aún más los motivos encontrados (pero, la significancia se mantuvo). Por ejemplo, para el caso de la secuencia 2588 la secuencia regresó 4 motivos con significancia menor a 1 y el control negativo en este experimento retornó 1 motivo con significancia de 1.  Además, únicamente con este enfoque, podría usarse la secuencia completa del organismo como control.
 
 ![Figure 1](imgs/fig1.png)
 
-Motivos de algr
+###Motivos de Algr
+
 ![Figure 2](imgs/fig2.png)
 
 
-Figura 2: Descubrimiento de motivos de AlgR con MEME [1].
 ![Figure 3](imgs/fig3.png)
 
-Figura 3: Descubrimiento de motivos con RSat con picos obtenidos del art?culo original.
+
 ![Figure 4](imgs/fig4.png)
 
-Figura 4: Descubrimiento de motivos con RSat con picos obtenidos manualmente con MACS2.
 
-###An?lisis de diadas
+###Análisis de diadas
 
-El an?lisis de diadas se realiz? con la herramienta dyad-analysis de RSat, en el servidor de procariotes. Para esto, se us? el archivo en formato fasta del pico de AlgR y P. aeruginosa como organismo para modelo de Background, el resto de los par?metros se quedaron en su forma predeterminada.
-
-
+El análisis de diadas se realizó con la herramienta dyad-analysis de RSat, en el servidor de procariotes. Para esto, se usó el archivo en formato fasta del pico de AlgR y P. aeruginosa como organismo para modelo de Background, el resto de los parámetros se quedaron en su forma predeterminada.
 ![Figure 5](imgs/fig5.png)
+
 ###Workflow para nuestros peaks
 
 Descargar Secuencias de lecturas cortas
@@ -93,10 +84,10 @@ http://support.illumina.com/sequencing/sequencing_software/igenome.html
 bowtie2 build [Genome_fasta] PAO1
 
 Mapear Lecturas de Illumina con genoma de referencia
-	bowtie2 PAO1 seq_name.fastq -S seq_name.sam -N 1
-	bowtie2 PAO1 seq_name.fastq -S seq_name.sam --very-sensitive
+	bowtie2 PAO1 seq_ name.fastq -S seq_name.sam -N 1
+	bowtie2 PAO1 seq_ name.fastq -S seq_name.sam --very-sensitive
 
-El cambio daba ~1% de m?s secuencias, por lo que decidimos usar en RSAT los mapeos de la l?nea inicial
+El cambio daba ~1% de más secuencias, por lo que decidimos usar en RSAT los mapeos de la línea inicial
 
 Pseudomonas aeruginosa strain PAO1  NCBI  2000-09-13
  
@@ -109,11 +100,11 @@ Pseudomonas aeruginosa strain PAO1  NCBI  2000-09-13
 ![](imgs/tabla9.png)
 
 
-MACS2 Peak Call
-macs2 callpeak -t SAM/$bname.sam -f SAM -n peaks/$bname -g 6.3e6 -q 0.01 --nomodel --shiftsize 100
+###MACS2 Peak Call
+macs2 callpeak -t SAM/$ bname.sam -f SAM -n peaks/$bname -g 6.3e6 -q 0.01 --nomodel --shiftsize 100
 
 ------------------------
-Comandos en el servidor: 
+###Comandos en el servidor: 
 
 Peak Calling: $RSAT/perl-scripts/peak-motifs  -v 1 -title '2688vsmacs2'  -i $RSAT/public_html/tmp/apache/2016/02/20/peak-motifs.2016-02-20.195401_2016-02-20.195401_PP1XpT/peak-motifspeak_seq  -max_seq_len 1000 -markov auto -disco oligos,positions -nmotifs 5  -minol 6 -maxol 7  -no_merge_lengths -2str  -origin center  -motif_db regulonDB tf $RSAT/public_html/motif_databases/REGULONDB/regulonDB_2015-08-07.tf -scan_markov 1 -source getfasta  -task purge,seqlen,composition,disco,merge_motifs,split_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan -prefix peak-motifs -noov -img_format png  -outdir $RSAT/public_html/tmp/apache/2016/02/20/peak-motifs.2016-02-20.195401_2016-02-20.195401_PP1XpT)
 
@@ -123,24 +114,17 @@ Control negativo: $RSAT/perl-scripts/random-genome-fragments  -template_format l
 
 $RSAT/perl-scripts/peak-motifs  -v 1 -title '2588_negativectrol'  -i $RSAT/public_html/tmp/www-data/2016/02/22/peak-motifs.2016-02-22.032359_2016-02-22.032359_flPJWK/peak-motifspeak_seq -ctrl $RSAT/public_html/tmp/www-data/2016/02/22/peak-motifs.2016-02-22.032359_2016-02-22.032359_flPJWK/peak-motifscontrol_seq  -max_seq_len 1000 -markov auto -disco oligos,positions -nmotifs 5  -minol 6 -maxol 7  -no_merge_lengths -2str  -origin center  -motif_db regulonDB tf $RSAT/public_html/motif_databases/REGULONDB/regulonDB_2015-08-07.tf -scan_markov 1 -task purge,seqlen,composition,disco,merge_motifs,split_motifs,motifs_vs_motifs,timelog,archive,synthesis,small_summary,motifs_vs_db,scan -prefix peak-motifs -noov -img_format png  -outdir $RSAT/public_html/tmp/www-data/2016/02/22/peak-motifs.2016-02-22.032359_2016-02-22.032359_flPJWK
 
-
-Bibliograf?a.
-http://nar.oxfordjournals.org/content/43/17/8268.long
-Langmead, B., Trapnell, C., Pop, M., & Salzberg, S. L. (2009). Ultrafast and memory-efficient alignment of short DNA sequences to the human genome. Genome biol, 10(3), R25.
-
-
-
 $RSAT/perl-scripts/retrieve-seq  -org Pseudomonas_aeruginosa_PAO1_uid57945 -feattype gene -type upstream -format fasta -label name -from -1000 -to 200 -noorf  -rm  -all (?)
 
 ##Peak Calling Statistics
 
-Llamamos datos
+Llamamos datos:
 ```{r}
 chip_art <- read.table("GSE65356_algrmacs2e15_peaks.txt", header = T)
 chip_ours <-read.table("SRR1776550_peaks.xls", header=T)
 
 ```
-Ploteamos la distribuci?n de reads de acuerdo al pileup.
+Ploteamos la distribución de reads de acuerdo al pileup:
 
 ```{r}
 par(mfrow=c(3,1))
@@ -174,7 +158,7 @@ hist(chip_ours$pileup,
 ```
 
 
-Ploteamos el enriquecimiento de picos uno sobre otro y viceversa, para ver d?nde coinciden y con cu?nta precisi?n.
+Ploteamos el enriquecimiento de picos uno sobre otro y viceversa, para ver dónde coinciden y con cuánta precisión.
 ```{r}
 
 par(mfrow=c(2,1))
@@ -212,5 +196,5 @@ plot(chip_art$abs_summit,
      col="red", type = "h")
 ``` 
 
-summit <- chip_art$abs_summit
-peaks <- apply(summit,1,subset(chip_ours,start<chip_art$abs_summit & end>chip_art$abs_summit)))
+summit <- chip_ art$abs_summit
+peaks <- apply(summit,1,subset(chip_ ours,start<chip_ art$abs_ summit & end>chip_ art$abs_summit)))
